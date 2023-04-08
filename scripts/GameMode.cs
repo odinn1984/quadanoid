@@ -94,6 +94,7 @@ public partial class GameMode : Node2D
 
     _effectAnimationPlayer.Play("ReverseTransition");
     _transitionEffectTimer.Start();
+    _menuEffect.Visible = true;
 
     _restartLevel.Pressed += OnRestartLevelPressed;
     _mainMenuLevel.Pressed += OnMainMenuPressed;
@@ -142,6 +143,7 @@ public partial class GameMode : Node2D
     _transitionEffectTimer.Start();
     _effectAnimationPlayer.Play("Transition");
     _restartingScene = true;
+    _pauseMenu.Visible = false;
   }
 
   private void OnMainMenuPressed()
@@ -169,7 +171,9 @@ public partial class GameMode : Node2D
     }
     else
     {
-      SetMovementState(false, true);
+      _menuEffect.Visible = false;
+      _respawnEffect.Visible = true;
+      _respawnEffectTimer.Start();
     }
   }
 
