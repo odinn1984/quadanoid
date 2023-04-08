@@ -34,15 +34,10 @@ public partial class BallController : CharacterBody2D
 
   public override void _Ready()
   {
-    Random r = new Random();
-
     CanMove = _launchOnStart;
     _currentSpeed = _maxSpeed;
 
-    do
-    {
-      _direction = new Vector2(Math.Clamp(r.NextSingle(), -0.25f, 0.25f), -1.0f);
-    } while (MathF.Abs(_direction.X) <= 0.1f);
+    SetInitialDirection();
 
     _spawPosition = Position;
 
@@ -168,8 +163,6 @@ public partial class BallController : CharacterBody2D
 
   public void Respawn()
   {
-    Random r = new Random();
-
     while (_trail.GetPointCount() > 0)
     {
       _trail.RemovePoint(0);
@@ -179,7 +172,7 @@ public partial class BallController : CharacterBody2D
     Velocity = Vector2.Zero;
 
     CanMove = _launchOnStart;
-    _direction = new Vector2(r.NextSingle() - 0.5f, -1.0f);
+    SetInitialDirection();
   }
 
   public void SetSpeedPercent(float percent)
@@ -188,5 +181,15 @@ public partial class BallController : CharacterBody2D
     {
       _currentSpeed *= percent;
     }
+  }
+
+  private void SetInitialDirection()
+  {
+    Random random = new Random();
+
+    do
+    {
+      _direction = new Vector2(Math.Clamp(random.NextSingle() - 0.5f, -0.25f, 0.25f), -1.0f);
+    } while (MathF.Abs(_direction.X) <= 0.1f);
   }
 }

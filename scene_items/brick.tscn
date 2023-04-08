@@ -1,4 +1,4 @@
-[gd_scene load_steps=17 format=3 uid="uid://dv06nexrlhxay"]
+[gd_scene load_steps=20 format=3 uid="uid://dv06nexrlhxay"]
 
 [ext_resource type="Script" path="res://scene_items/scripts/BrickController.cs" id="1_bqqu2"]
 [ext_resource type="Texture2D" uid="uid://dg40mq2gjxmvj" path="res://scene_items/sprites/brick.png" id="2_qu6ns"]
@@ -91,6 +91,63 @@ turbulence_influence_max = 0.34
 turbulence_initial_displacement_min = -54.9
 turbulence_initial_displacement_max = 39.2
 
+[sub_resource type="Animation" id="Animation_ivcr5"]
+resource_name = "Shake"
+length = 0.5
+tracks/0/type = "bezier"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("BrickSprite:offset:x")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"handle_modes": PackedInt32Array(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0),
+"points": PackedFloat32Array(0, -0.25, 0, 0.25, 0, -2.5, -0.25, 0, 0.25, 0, 2.5, -0.25, 0, 0.25, 0, 2.5, -0.25, 0, 0.25, 0, -2.5, -0.25, 0, 0.25, 0, 0, -0.25, 0, 0.25, 0, 5, -0.25, 0, 0.25, 0, -5, -0.25, 0, 0.25, 0, 5, -0.25, 0, 0.25, 0, -5, -0.25, 0, 0.25, 0, 0, -0.25, 0, 0.25, 0),
+"times": PackedFloat32Array(0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1)
+}
+tracks/1/type = "bezier"
+tracks/1/imported = false
+tracks/1/enabled = true
+tracks/1/path = NodePath("BrickSprite:offset:y")
+tracks/1/interp = 1
+tracks/1/loop_wrap = true
+tracks/1/keys = {
+"handle_modes": PackedInt32Array(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0),
+"points": PackedFloat32Array(0, -0.25, 0, 0.25, 0, 2.5, -0.25, 0, 0.25, 0, -2.5, -0.25, 0, 0.25, 0, 2.5, -0.25, 0, 0.25, 0, -2.5, -0.25, 0, 0.25, 0, 0, -0.25, 0, 0.25, 0, 0, -0.25, 0, 0.25, 0, 5, -0.25, 0, 0.25, 0, 5, -0.25, 0, 0.25, 0, -5, -0.25, 0, 0.25, 0, 0, -0.25, 0, 0.25, 0),
+"times": PackedFloat32Array(0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1)
+}
+
+[sub_resource type="Animation" id="Animation_yvn4d"]
+length = 0.001
+tracks/0/type = "bezier"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("BrickSprite:offset:x")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"handle_modes": PackedInt32Array(0),
+"points": PackedFloat32Array(0, -0.25, 0, 0.25, 0),
+"times": PackedFloat32Array(0)
+}
+tracks/1/type = "bezier"
+tracks/1/imported = false
+tracks/1/enabled = true
+tracks/1/path = NodePath("BrickSprite:offset:y")
+tracks/1/interp = 1
+tracks/1/loop_wrap = true
+tracks/1/keys = {
+"handle_modes": PackedInt32Array(0),
+"points": PackedFloat32Array(0, -0.25, 0, 0.25, 0),
+"times": PackedFloat32Array(0)
+}
+
+[sub_resource type="AnimationLibrary" id="AnimationLibrary_ssata"]
+_data = {
+"RESET": SubResource("Animation_yvn4d"),
+"Shake": SubResource("Animation_ivcr5")
+}
+
 [node name="Brick" type="StaticBody2D" node_paths=PackedStringArray("_sprite") groups=["Bricks"]]
 scale = Vector2(0.8, 0.8)
 collision_layer = 8
@@ -138,3 +195,8 @@ lifetime = 1.5
 one_shot = true
 explosiveness = 1.0
 fixed_fps = 60
+
+[node name="AnimationPlayer" type="AnimationPlayer" parent="."]
+libraries = {
+"": SubResource("AnimationLibrary_ssata")
+}

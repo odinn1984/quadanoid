@@ -12,11 +12,16 @@ public partial class GameMode : Node2D
   public const string LivesLabelPath = "HUD/BottomHUDBorder/BottomHUD/BottomHUDLeftContainer/Lives";
   public const string LevelLabelPath = "HUD/BottomHUDBorder/BottomHUD/BottomHUDRightContainer/Level";
   public const string BrickMatrixPath = "BrickMatrix";
-  public const string PauseMenuPath = "PauseMenu";
-  public const string PauseMenuTitlePath = "PauseMenu/MenuText";
-  public const string RestartLevelButtonPath = "PauseMenu/RestartGame";
-  public const string MainMenuButtonPath = "PauseMenu/BackToMenu";
-  public const string QuitGameButtonPath = "PauseMenu/QuitGame";
+  public const string PauseMenuPath = "MenuLayer/PauseMenu";
+  public const string PauseMenuTitlePath = $"{PauseMenuPath}/MenuText";
+  public const string RestartLevelButtonPath = $"{PauseMenuPath}/RestartGame";
+  public const string MainMenuButtonPath = $"{PauseMenuPath}/BackToMenu";
+  public const string QuitGameButtonPath = $"{PauseMenuPath}/QuitGame";
+  public const string MenuEffectPath = "Camera2D/EffectLayer/BlurEffect";
+  public const string RespawnEffectPath = "Camera2D/EffectLayer/GlitchEffect";
+  public const string RespawnEffectTimerPath = "Timers/RespawnEffectTimer";
+  public const string TransitionEffectTimerPath = "Timers/TransitionEffectTimer";
+  public const string EffectAnimationPlayerPath = "Camera2D/EffectLayer/EffectsAnimation";
 
   public const string SaveFilePath = "user://save.data";
 
@@ -37,6 +42,7 @@ public partial class GameMode : Node2D
   private bool _levelRestarting = false;
   private bool _gamePaused = false;
   private bool _ballShot = false;
+  private bool _restartingScene = false;
   private uint _score = 0;
   private uint _highScore = 0;
   private uint _livesRemaining;
@@ -56,6 +62,11 @@ public partial class GameMode : Node2D
   private Button _quitGameLevel;
   private Control _brickMatrix;
   private Control _pauseMenu;
+  private ColorRect _menuEffect;
+  private ColorRect _respawnEffect;
+  private Timer _respawnEffectTimer;
+  private Timer _transitionEffectTimer;
+  private AnimationPlayer _effectAnimationPlayer;
   private CharacterBody2D _ball;
   private CharacterBody2D[] _paddles = {};
 
@@ -75,13 +86,25 @@ public partial class GameMode : Node2D
     _restartLevel = LoadNode<Button>(RestartLevelButtonPath);
     _mainMenuLevel = LoadNode<Button>(MainMenuButtonPath);
     _quitGameLevel = LoadNode<Button>(QuitGameButtonPath);
+    _menuEffect = LoadNode<ColorRect>(MenuEffectPath);
+    _respawnEffect= LoadNode<ColorRect>(RespawnEffectPath);
+    _respawnEffectTimer = LoadNode<Timer>(RespawnEffectTimerPath);
+    _transitionEffectTimer = LoadNode<Timer>(TransitionEffectTimerPath);
+    _effectAnimationPlayer = LoadNode<AnimationPlayer>(EffectAnimationPlayerPath);
+
+    _effectAnimationPlayer.Play("ReverseTransition");
+    _transitionEffectTimer.Start();
 
     _restartLevel.Pressed += OnRestartLevelPressed;
     _mainMenuLevel.Pressed += OnMainMenuPressed;
     _quitGameLevel.Pressed += OnQuitGamePressed;
+    _respawnEffectTimer.Timeout += OnRespawnEffectTimeOut;
+    _transitionEffectTimer.Timeout += OnTransitionEffectTimeOut;
 
     InitializePaddles();
     LoadHighScore();
+
+    SetMovementState(false, false);
   }
 
   private T LoadNode<T>(string path) where T : GodotObject
@@ -115,7 +138,10 @@ public partial class GameMode : Node2D
   private void OnRestartLevelPressed()
   {
     SaveHighScore();
-    GetTree().ChangeSceneToFile(GetTree().CurrentScene.SceneFilePath);
+
+    _transitionEffectTimer.Start();
+    _effectAnimationPlayer.Play("Transition");
+    _restartingScene = true;
   }
 
   private void OnMainMenuPressed()
@@ -127,6 +153,24 @@ public partial class GameMode : Node2D
   {
     SaveHighScore();
     GetTree().Quit();
+  }
+
+  private void OnRespawnEffectTimeOut()
+  {
+    _respawnEffect.Visible = false;
+    SetMovementState(false, true);
+  }
+
+  private void OnTransitionEffectTimeOut()
+  {
+    if (_restartingScene)
+    {
+      GetTree().ChangeSceneToFile(GetTree().CurrentScene.SceneFilePath);
+    }
+    else
+    {
+      SetMovementState(false, true);
+    }
   }
 
   public override void _Process(double delta)
@@ -150,6 +194,7 @@ public partial class GameMode : Node2D
 
     if (BrickCount == 0 && !_levelRestarting)
     {
+      _effectAnimationPlayer.Play("Transition", -1, 2.0f);
       RestartLevel();
     }
 
@@ -166,14 +211,18 @@ public partial class GameMode : Node2D
       return;
     }
 
-    if (_currentBallPosition.X < _viewportBounds.Position.X || _currentBallPosition.X > _viewportBounds.Size.X)
+    if (_ball.Velocity.Length() != 0.0f)
     {
-      Respawn();
-    }
+      if (_currentBallPosition.X < _viewportBounds.Position.X - 10.0f || _currentBallPosition.X > _viewportBounds.Size.X + 10.0f)
+      {
+        Respawn();
+      }
 
-    if (_currentBallPosition.Y < _viewportBounds.Position.Y || _currentBallPosition.Y > _viewportBounds.Size.Y)
-    {
-      Respawn();
+      if (_currentBallPosition.Y < _viewportBounds.Position.Y - 10.0f || 
+          _currentBallPosition.Y > _viewportBounds.Size.Y - 60.0f)
+      {
+        Respawn();
+      }
     }
   }
 
@@ -183,9 +232,13 @@ public partial class GameMode : Node2D
     {
       DecreaseScore();
       DecreaseLives();
-    }
 
-    SetMovementState(false, false);
+      if (_livesRemaining > 0)
+      {
+        _respawnEffect.Visible = true;
+        _respawnEffectTimer.Start();
+      }
+    }
 
     if (_livesRemaining == 0)
     {
@@ -200,6 +253,8 @@ public partial class GameMode : Node2D
     }
 
     _ballShot = false;
+
+    SetMovementState(false, false);
   }
 
   public void RemoveBrick()
@@ -318,7 +373,8 @@ public partial class GameMode : Node2D
     _pauseMenuLabel.Text = title.ToUpper();
 
       _pauseMenu.Visible = !_pauseMenu.Visible;
-    _gamePaused = _pauseMenu.Visible;
+      _menuEffect.Visible = !_menuEffect.Visible;
+      _gamePaused = _pauseMenu.Visible;
 
     SetMovementState(!_gamePaused && _ballShot, !_gamePaused);
   }

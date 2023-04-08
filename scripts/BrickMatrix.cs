@@ -76,13 +76,13 @@ public partial class BrickMatrix : Control
         Random random = new Random();
         uint numberOfHits = (uint)random.Next(0, 3);
 
-        brick.Set("HitNumber", numberOfHits);
+        brick.Set("HitNumber", h == Math.Floor(_gridSize.Y / 2.0f) ? -1 : numberOfHits);
 
         _brickContainer.AddChild(brick);
       }
     }
 
-    GetParent().SetDeferred("BrickCount", _gridSize.X * _gridSize.Y);
+    GetParent().SetDeferred("BrickCount", _gridSize.X * _gridSize.Y - _gridSize.X);
   }
 
   public void OnBrickDestroyed()

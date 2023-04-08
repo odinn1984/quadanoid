@@ -7,12 +7,18 @@ public partial class BrickController : StaticBody2D
   [Export]
   private Sprite2D _sprite;
 
-  private uint HitNumber { get; set; } = 1;
+  private int HitNumber { get; set; } = 1;
 
-  private Color _color = new Color(1.0f, 1.0f, 1.0f);
+  private Color[] _brickColors =
+  {
+    new Color("#FFDEB9"),
+    new Color("#FE6244"),
+    new Color("#FC2947")
+  };
 
   private GpuParticles2D _explosion;
   private GpuParticles2D _impact;
+  private AnimationPlayer _animationPlayer;
 
   public override void _Ready()
   {
@@ -23,26 +29,43 @@ public partial class BrickController : StaticBody2D
 
     _explosion = GetNode<GpuParticles2D>("Explosion");
     _impact = GetNode<GpuParticles2D>("Impact");
+    _animationPlayer = GetNode<AnimationPlayer>("AnimationPlayer");
   }
 
   public override void _Process(double delta)
   {
-    Color[] brickColors =
+    if (HitNumber < 0)
     {
-      new Color("#FFDEB9"),
-      new Color("#FE6244"),
-      new Color("#FC2947")
-    };
-
-    _sprite.Modulate = brickColors[HitNumber]; 
+      _sprite.Modulate = new Color("#7149c6");
+    }
+    else
+    {
+      _sprite.Modulate = _brickColors[HitNumber];
+    }
   }
 
   async public void Hit()
   {
+    Random random = new Random();
+
+    if (HitNumber < 0)
+    {
+      _animationPlayer.SpeedScale = Math.Clamp(random.NextSingle(), 3.0f, 4.0f);
+      _animationPlayer.Play("Shake");
+
+      return;
+    }
+    
     if (HitNumber > 0)
     {
       HitNumber--;
+
+      _impact.Restart();
       _impact.Emitting = true;
+
+      _animationPlayer.SpeedScale = Math.Clamp(random.NextSingle(), 3.0f, 4.0f);
+      _animationPlayer.Play("Shake");
+
       return;
     }
 

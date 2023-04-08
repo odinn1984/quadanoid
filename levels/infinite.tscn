@@ -1,9 +1,83 @@
-[gd_scene load_steps=15 format=3 uid="uid://dawwmggkh86ms"]
+[gd_scene load_steps=25 format=3 uid="uid://cvt6ygctmahbu"]
 
 [ext_resource type="Script" path="res://scripts/GameMode.cs" id="1_ggg8o"]
+[ext_resource type="Shader" path="res://shaders/blur.gdshader" id="2_ogey8"]
 [ext_resource type="PackedScene" uid="uid://c3v8bkjjugc30" path="res://player/ball.tscn" id="2_om5qa"]
+[ext_resource type="Shader" path="res://shaders/glitch.gdshader" id="3_an3g4"]
 [ext_resource type="PackedScene" uid="uid://d3c0nfo7h0hqq" path="res://player/paddle.tscn" id="3_d8fa2"]
+[ext_resource type="Shader" path="res://shaders/transition.gdshader" id="4_j3xgx"]
 [ext_resource type="PackedScene" uid="uid://cmi6cnycxjxil" path="res://levels/brick_matrix.tscn" id="4_tf0sx"]
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_crlrp"]
+shader = ExtResource("2_ogey8")
+shader_parameter/amount = 1.5
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_66qxk"]
+shader = ExtResource("3_an3g4")
+shader_parameter/range = 0.03
+shader_parameter/noiseQuality = 96.552
+shader_parameter/noiseIntensity = 0.05
+shader_parameter/offsetIntensity = 0.01
+shader_parameter/colorOffsetIntensity = 0.3
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_unwkg"]
+shader = ExtResource("4_j3xgx")
+shader_parameter/num_lines = 5.0
+shader_parameter/y_threshold = 0.0
+shader_parameter/line_color_a = Color(1, 0.870588, 0.72549, 1)
+shader_parameter/line_color_b = Color(0.988235, 0.160784, 0.278431, 1)
+
+[sub_resource type="Animation" id="Animation_yu3by"]
+resource_name = "Transition"
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("Transition:material:shader_parameter/y_threshold")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0, 1),
+"transitions": PackedFloat32Array(1, 1),
+"update": 0,
+"values": [0.0, 1.0]
+}
+
+[sub_resource type="Animation" id="Animation_3fjlf"]
+length = 0.001
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("Transition:material:shader_parameter/y_threshold")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 0,
+"values": [0.0]
+}
+
+[sub_resource type="Animation" id="Animation_sgqgb"]
+resource_name = "ReverseTransition"
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("Transition:material:shader_parameter/y_threshold")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0.5, 1),
+"transitions": PackedFloat32Array(1, 1),
+"update": 0,
+"values": [1.0, 0.0]
+}
+
+[sub_resource type="AnimationLibrary" id="AnimationLibrary_cbe0c"]
+_data = {
+"RESET": SubResource("Animation_3fjlf"),
+"ReverseTransition": SubResource("Animation_sgqgb"),
+"Transition": SubResource("Animation_yu3by")
+}
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_57ubn"]
 size = Vector2(736, 20)
@@ -55,7 +129,6 @@ font_size = 40
 font_color = Color(0.996078, 0.384314, 0.266667, 1)
 
 [node name="Infinite" type="Node2D"]
-position = Vector2(-360, -360)
 script = ExtResource("1_ggg8o")
 
 [node name="Background" type="Polygon2D" parent="."]
@@ -74,10 +147,40 @@ blend_mode = 2
 position = Vector2(0, -40)
 anchor_mode = 0
 
-[node name="Ball" parent="." instance=ExtResource("2_om5qa")]
-position = Vector2(360, 675)
-_ballColor = Color(0.996078, 0.384314, 0.266667, 1)
-_maxSpeed = 300.0
+[node name="EffectLayer" type="CanvasLayer" parent="Camera2D"]
+
+[node name="BlurEffect" type="ColorRect" parent="Camera2D/EffectLayer"]
+visible = false
+material = SubResource("ShaderMaterial_crlrp")
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+
+[node name="GlitchEffect" type="ColorRect" parent="Camera2D/EffectLayer"]
+visible = false
+material = SubResource("ShaderMaterial_66qxk")
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Transition" type="ColorRect" parent="Camera2D/EffectLayer"]
+material = SubResource("ShaderMaterial_unwkg")
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="EffectsAnimation" type="AnimationPlayer" parent="Camera2D/EffectLayer"]
+libraries = {
+"": SubResource("AnimationLibrary_cbe0c")
+}
 
 [node name="Paddles" type="Node2D" parent="."]
 
@@ -120,6 +223,11 @@ _friction = 1.0
 _paddleColor = Color(0.443137, 0.286275, 0.776471, 1)
 
 [node name="BrickContainer" type="Node2D" parent="."]
+
+[node name="Ball" parent="." instance=ExtResource("2_om5qa")]
+position = Vector2(360, 675)
+_ballColor = Color(0.996078, 0.384314, 0.266667, 1)
+_maxSpeed = 300.0
 
 [node name="Bounds" type="Node2D" parent="."]
 
@@ -262,7 +370,9 @@ size_flags_horizontal = 3
 text = "LVL 1 (+100%)"
 label_settings = SubResource("LabelSettings_nhhq2")
 
-[node name="PauseMenu" type="Control" parent="."]
+[node name="MenuLayer" type="CanvasLayer" parent="."]
+
+[node name="PauseMenu" type="Control" parent="MenuLayer"]
 visible = false
 layout_mode = 3
 anchors_preset = 8
@@ -270,20 +380,20 @@ anchor_left = 0.5
 anchor_top = 0.5
 anchor_right = 0.5
 anchor_bottom = 0.5
-offset_left = 150.0
-offset_top = 250.0
-offset_right = 570.0
-offset_bottom = 470.0
+offset_left = -210.0
+offset_top = -120.0
+offset_right = 210.0
+offset_bottom = 100.0
 grow_horizontal = 2
 grow_vertical = 2
 
-[node name="Border" type="ColorRect" parent="PauseMenu"]
+[node name="Border" type="ColorRect" parent="MenuLayer/PauseMenu"]
 layout_mode = 0
 offset_right = 420.0
 offset_bottom = 220.0
 color = Color(1, 0.870588, 0.72549, 1)
 
-[node name="BGColor" type="ColorRect" parent="PauseMenu"]
+[node name="BGColor" type="ColorRect" parent="MenuLayer/PauseMenu"]
 layout_mode = 0
 offset_left = 10.0
 offset_top = 10.0
@@ -291,7 +401,7 @@ offset_right = 410.0
 offset_bottom = 210.0
 color = Color(0.054902, 0.0196078, 0.137255, 1)
 
-[node name="MenuText" type="Label" parent="PauseMenu"]
+[node name="MenuText" type="Label" parent="MenuLayer/PauseMenu"]
 layout_mode = 0
 offset_left = 96.0
 offset_top = 19.0
@@ -302,7 +412,7 @@ text = "MENU
 label_settings = SubResource("LabelSettings_i7j28")
 horizontal_alignment = 1
 
-[node name="RestartGame" type="Button" parent="PauseMenu"]
+[node name="RestartGame" type="Button" parent="MenuLayer/PauseMenu"]
 layout_mode = 0
 offset_left = 155.5
 offset_top = 85.0
@@ -312,7 +422,7 @@ theme_override_colors/font_color = Color(1, 0.870588, 0.72549, 1)
 text = "Restart Level
 "
 
-[node name="BackToMenu" type="Button" parent="PauseMenu"]
+[node name="BackToMenu" type="Button" parent="MenuLayer/PauseMenu"]
 layout_mode = 0
 offset_left = 155.5
 offset_top = 125.0
@@ -321,7 +431,7 @@ offset_bottom = 156.0
 theme_override_colors/font_color = Color(1, 0.870588, 0.72549, 1)
 text = "Exit To Menu"
 
-[node name="QuitGame" type="Button" parent="PauseMenu"]
+[node name="QuitGame" type="Button" parent="MenuLayer/PauseMenu"]
 layout_mode = 0
 offset_left = 155.5
 offset_top = 165.0
@@ -330,3 +440,13 @@ offset_bottom = 196.0
 theme_override_colors/font_color = Color(1, 0.870588, 0.72549, 1)
 text = "Quit Game
 "
+
+[node name="Timers" type="Node" parent="."]
+
+[node name="RespawnEffectTimer" type="Timer" parent="Timers"]
+wait_time = 0.25
+one_shot = true
+
+[node name="TransitionEffectTimer" type="Timer" parent="Timers"]
+wait_time = 1.1
+one_shot = true

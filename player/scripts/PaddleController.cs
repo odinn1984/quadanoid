@@ -1,8 +1,5 @@
 using Godot;
 using System;
-using System.Numerics;
-using System.Reflection.Metadata;
-using Vector2 = Godot.Vector2;
 
 public partial class PaddleController : CharacterBody2D
 {
@@ -39,16 +36,23 @@ public partial class PaddleController : CharacterBody2D
 
   public override void _Ready()
   {
-    _sprite = GetNode<Sprite2D>(PaddleSpritePath);
-
-    if (_sprite == null)
-    {
-      GD.PrintErr($"Couldn't find object at path: {PaddleSpritePath}");
-    }
+    _sprite = LoadNode<Sprite2D>(PaddleSpritePath);
 
     _sprite.Modulate = _paddleColor;
     _spawnPosition = Position;
     _currentSpeed = _maxSpeed;
+  }
+
+  private T LoadNode<T>(string path) where T : GodotObject
+  {
+    T node = GetNode<T>(path);
+
+    if (node == null)
+    {
+      GD.PrintErr($"Couldn't find object at path: {path}");
+    }
+
+    return node;
   }
 
   public override void _Process(double delta)
@@ -199,7 +203,5 @@ public partial class PaddleController : CharacterBody2D
     {
       _currentSpeed *= percent;
     }
-
-    GD.Print(_currentSpeed);
   }
 }
