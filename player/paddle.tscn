@@ -1,0 +1,50 @@
+[gd_scene load_steps=6 format=3 uid="uid://d3c0nfo7h0hqq"]
+
+[ext_resource type="Script" path="res://player/scripts/PaddleController.cs" id="1_ofybl"]
+[ext_resource type="Texture2D" uid="uid://b01bih14jygik" path="res://player/sprites/paddle.png" id="1_xdf2f"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_oftj6"]
+size = Vector2(116.875, 33.1251)
+
+[sub_resource type="CapsuleShape2D" id="CapsuleShape2D_jv6xe"]
+radius = 6.0
+height = 33.5
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_rmyxp"]
+size = Vector2(140, 40)
+
+[node name="Paddle" type="CharacterBody2D" groups=["Paddles"]]
+scale = Vector2(0.8, 0.8)
+collision_layer = 4
+collision_mask = 39
+motion_mode = 1
+script = ExtResource("1_ofybl")
+
+[node name="PaddleSprite" type="Sprite2D" parent="."]
+texture = ExtResource("1_xdf2f")
+
+[node name="PaddleCollision" type="CollisionShape2D" parent="."]
+position = Vector2(0, -7.10543e-15)
+scale = Vector2(0.999998, 0.999998)
+shape = SubResource("RectangleShape2D_oftj6")
+debug_color = Color(0.733333, 0.623529, 0, 0.419608)
+
+[node name="LeftPaddleCollision" type="CollisionShape2D" parent="."]
+position = Vector2(-58.75, 0)
+shape = SubResource("CapsuleShape2D_jv6xe")
+debug_color = Color(0.823529, 0.4, 0.0392157, 0.419608)
+
+[node name="RightPaddleCollision" type="CollisionShape2D" parent="."]
+position = Vector2(58.75, 0)
+shape = SubResource("CapsuleShape2D_jv6xe")
+debug_color = Color(0.823529, 0.4, 0.0392157, 0.419608)
+
+[node name="PickupTrigger" type="Area2D" parent="."]
+collision_layer = 4
+collision_mask = 18
+
+[node name="PickupTriggerCollision" type="CollisionShape2D" parent="PickupTrigger"]
+position = Vector2(-1.19209e-07, 2.27374e-13)
+scale = Vector2(0.999999, 0.999999)
+shape = SubResource("RectangleShape2D_rmyxp")
+debug_color = Color(0.690196, 0.290196, 1, 0.419608)

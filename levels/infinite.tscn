@@ -1,0 +1,332 @@
+[gd_scene load_steps=15 format=3 uid="uid://dawwmggkh86ms"]
+
+[ext_resource type="Script" path="res://scripts/GameMode.cs" id="1_ggg8o"]
+[ext_resource type="PackedScene" uid="uid://c3v8bkjjugc30" path="res://player/ball.tscn" id="2_om5qa"]
+[ext_resource type="PackedScene" uid="uid://d3c0nfo7h0hqq" path="res://player/paddle.tscn" id="3_d8fa2"]
+[ext_resource type="PackedScene" uid="uid://cmi6cnycxjxil" path="res://levels/brick_matrix.tscn" id="4_tf0sx"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_57ubn"]
+size = Vector2(736, 20)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_f12v5"]
+size = Vector2(752, 20)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_q124e"]
+size = Vector2(20, 752)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_qgvev"]
+size = Vector2(18, 752)
+
+[sub_resource type="Environment" id="Environment_rw784"]
+background_mode = 3
+background_color = Color(0.0431373, 0.0431373, 0.0431373, 1)
+glow_enabled = true
+glow_intensity = 1.0
+glow_bloom = 0.1
+glow_blend_mode = 0
+adjustment_enabled = true
+adjustment_brightness = 0.9
+adjustment_contrast = 1.1
+adjustment_saturation = 1.5
+
+[sub_resource type="LabelSettings" id="LabelSettings_6tkn7"]
+line_spacing = 0.0
+font_size = 29
+font_color = Color(1, 0.870588, 0.72549, 1)
+
+[sub_resource type="LabelSettings" id="LabelSettings_jrg1j"]
+line_spacing = 0.0
+font_size = 29
+font_color = Color(1, 0.870588, 0.72549, 1)
+
+[sub_resource type="LabelSettings" id="LabelSettings_hch23"]
+line_spacing = 0.0
+font_size = 29
+font_color = Color(1, 0.870588, 0.72549, 1)
+
+[sub_resource type="LabelSettings" id="LabelSettings_nhhq2"]
+line_spacing = 0.0
+font_size = 29
+font_color = Color(1, 0.870588, 0.72549, 1)
+
+[sub_resource type="LabelSettings" id="LabelSettings_i7j28"]
+line_spacing = 0.0
+font_size = 40
+font_color = Color(0.996078, 0.384314, 0.266667, 1)
+
+[node name="Infinite" type="Node2D"]
+position = Vector2(-360, -360)
+script = ExtResource("1_ggg8o")
+
+[node name="Background" type="Polygon2D" parent="."]
+show_behind_parent = true
+position = Vector2(360, 360)
+color = Color(0.054902, 0.0196078, 0.137255, 1)
+polygon = PackedVector2Array(-544, -472, 568, -472, 568, 448, 8.97729, 448, -544, 448)
+
+[node name="Lights" type="Node2D" parent="."]
+
+[node name="Sun" type="DirectionalLight2D" parent="Lights"]
+color = Color(1, 0.870588, 0.72549, 1)
+blend_mode = 2
+
+[node name="Camera2D" type="Camera2D" parent="."]
+position = Vector2(0, -40)
+anchor_mode = 0
+
+[node name="Ball" parent="." instance=ExtResource("2_om5qa")]
+position = Vector2(360, 675)
+_ballColor = Color(0.996078, 0.384314, 0.266667, 1)
+_maxSpeed = 300.0
+
+[node name="Paddles" type="Node2D" parent="."]
+
+[node name="TopPaddle" parent="Paddles" instance=ExtResource("3_d8fa2")]
+position = Vector2(360, 20)
+rotation = 3.14159
+_movementDirection = Vector2(-1, 0)
+_maxSpeed = 500.0
+_acceleration = 500.0
+_deceleration = 150.0
+_friction = 1.0
+_paddleColor = Color(0.443137, 0.286275, 0.776471, 1)
+
+[node name="BottomPaddle" parent="Paddles" instance=ExtResource("3_d8fa2")]
+position = Vector2(360, 700)
+_maxSpeed = 500.0
+_acceleration = 500.0
+_deceleration = 150.0
+_friction = 1.0
+_paddleColor = Color(0.443137, 0.286275, 0.776471, 1)
+
+[node name="LeftPaddle" parent="Paddles" instance=ExtResource("3_d8fa2")]
+position = Vector2(20, 360)
+rotation = 1.5708
+_movementDirection = Vector2(0, -1)
+_maxSpeed = 500.0
+_acceleration = 500.0
+_deceleration = 150.0
+_friction = 1.0
+_paddleColor = Color(0.443137, 0.286275, 0.776471, 1)
+
+[node name="RightPaddle" parent="Paddles" instance=ExtResource("3_d8fa2")]
+position = Vector2(700, 360)
+rotation = -1.5708
+_movementDirection = Vector2(0, 1)
+_maxSpeed = 500.0
+_acceleration = 500.0
+_deceleration = 150.0
+_friction = 1.0
+_paddleColor = Color(0.443137, 0.286275, 0.776471, 1)
+
+[node name="BrickContainer" type="Node2D" parent="."]
+
+[node name="Bounds" type="Node2D" parent="."]
+
+[node name="TopBound" type="StaticBody2D" parent="Bounds"]
+collision_layer = 32
+collision_mask = 4
+
+[node name="TopBoundCollision" type="CollisionShape2D" parent="Bounds/TopBound"]
+position = Vector2(360, -8)
+shape = SubResource("RectangleShape2D_57ubn")
+debug_color = Color(1, 0.294118, 0.223529, 0.419608)
+
+[node name="BottomBound" type="StaticBody2D" parent="Bounds"]
+position = Vector2(0, 1)
+collision_layer = 32
+collision_mask = 4
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Bounds/BottomBound"]
+position = Vector2(360, 727)
+shape = SubResource("RectangleShape2D_f12v5")
+debug_color = Color(1, 0.294118, 0.223529, 0.419608)
+
+[node name="LeftBound" type="StaticBody2D" parent="Bounds"]
+collision_layer = 32
+collision_mask = 4
+
+[node name="LeftBoundCollision" type="CollisionShape2D" parent="Bounds/LeftBound"]
+position = Vector2(-8, 360)
+shape = SubResource("RectangleShape2D_q124e")
+debug_color = Color(1, 0.294118, 0.223529, 0.419608)
+
+[node name="RightBound" type="StaticBody2D" parent="Bounds"]
+collision_layer = 32
+collision_mask = 4
+
+[node name="RightBoundCollision" type="CollisionShape2D" parent="Bounds/RightBound"]
+position = Vector2(727, 360)
+shape = SubResource("RectangleShape2D_qgvev")
+debug_color = Color(1, 0.294118, 0.223529, 0.419608)
+
+[node name="BrickMatrix" parent="." node_paths=PackedStringArray("_brickContainer") instance=ExtResource("4_tf0sx")]
+offset_left = 160.0
+offset_top = 270.0
+offset_right = 560.0
+offset_bottom = 450.0
+_brickPath = "res://scene_items/brick.tscn"
+_gridItemOffset = Vector2(5, 5)
+_brickContainer = NodePath("../BrickContainer")
+metadata/_edit_use_anchors_ = true
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="."]
+environment = SubResource("Environment_rw784")
+
+[node name="HUD" type="Control" parent="."]
+layout_mode = 3
+anchors_preset = 0
+offset_right = 40.0
+offset_bottom = 40.0
+
+[node name="TopHUDBorder" type="ColorRect" parent="HUD"]
+layout_mode = 0
+offset_top = -40.0
+offset_right = 720.0
+color = Color(0.988235, 0.160784, 0.278431, 1)
+
+[node name="TopHUDBackground" type="ColorRect" parent="HUD/TopHUDBorder"]
+layout_mode = 0
+offset_right = 720.0
+offset_bottom = 36.0
+color = Color(0, 0, 0, 1)
+
+[node name="TopHUD" type="GridContainer" parent="HUD/TopHUDBorder"]
+layout_mode = 0
+offset_left = 5.0
+offset_right = 715.0
+offset_bottom = 42.0
+columns = 2
+
+[node name="TopHUDLeftContainer" type="HBoxContainer" parent="HUD/TopHUDBorder/TopHUD"]
+layout_mode = 2
+size_flags_horizontal = 2
+size_flags_vertical = 3
+
+[node name="Score" type="Label" parent="HUD/TopHUDBorder/TopHUD/TopHUDLeftContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "SCORE 0
+"
+label_settings = SubResource("LabelSettings_6tkn7")
+
+[node name="TopHUDRightContainer" type="HBoxContainer" parent="HUD/TopHUDBorder/TopHUD"]
+layout_mode = 2
+size_flags_horizontal = 10
+size_flags_vertical = 3
+alignment = 2
+
+[node name="HighScore" type="Label" parent="HUD/TopHUDBorder/TopHUD/TopHUDRightContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "HIGH SCORE 0"
+label_settings = SubResource("LabelSettings_jrg1j")
+
+[node name="BottomHUDBorder" type="ColorRect" parent="HUD"]
+layout_mode = 0
+offset_top = 720.0
+offset_right = 720.0
+offset_bottom = 760.0
+color = Color(0.988235, 0.160784, 0.278431, 1)
+
+[node name="BottomHUDBackground" type="ColorRect" parent="HUD/BottomHUDBorder"]
+layout_mode = 0
+offset_top = 4.0
+offset_right = 720.0
+offset_bottom = 40.0
+color = Color(0, 0, 0, 1)
+
+[node name="BottomHUD" type="HBoxContainer" parent="HUD/BottomHUDBorder"]
+layout_mode = 0
+offset_left = 5.0
+offset_right = 715.0
+offset_bottom = 42.0
+
+[node name="BottomHUDLeftContainer" type="HBoxContainer" parent="HUD/BottomHUDBorder/BottomHUD"]
+layout_mode = 2
+size_flags_horizontal = 2
+
+[node name="Lives" type="Label" parent="HUD/BottomHUDBorder/BottomHUD/BottomHUDLeftContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "LIVES 0"
+label_settings = SubResource("LabelSettings_hch23")
+
+[node name="BottomHUDRightContainer" type="HBoxContainer" parent="HUD/BottomHUDBorder/BottomHUD"]
+layout_mode = 2
+size_flags_horizontal = 10
+
+[node name="Level" type="Label" parent="HUD/BottomHUDBorder/BottomHUD/BottomHUDRightContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "LVL 1 (+100%)"
+label_settings = SubResource("LabelSettings_nhhq2")
+
+[node name="PauseMenu" type="Control" parent="."]
+visible = false
+layout_mode = 3
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = 150.0
+offset_top = 250.0
+offset_right = 570.0
+offset_bottom = 470.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Border" type="ColorRect" parent="PauseMenu"]
+layout_mode = 0
+offset_right = 420.0
+offset_bottom = 220.0
+color = Color(1, 0.870588, 0.72549, 1)
+
+[node name="BGColor" type="ColorRect" parent="PauseMenu"]
+layout_mode = 0
+offset_left = 10.0
+offset_top = 10.0
+offset_right = 410.0
+offset_bottom = 210.0
+color = Color(0.054902, 0.0196078, 0.137255, 1)
+
+[node name="MenuText" type="Label" parent="PauseMenu"]
+layout_mode = 0
+offset_left = 96.0
+offset_top = 19.0
+offset_right = 324.0
+offset_bottom = 74.0
+text = "MENU
+"
+label_settings = SubResource("LabelSettings_i7j28")
+horizontal_alignment = 1
+
+[node name="RestartGame" type="Button" parent="PauseMenu"]
+layout_mode = 0
+offset_left = 155.5
+offset_top = 85.0
+offset_right = 264.5
+offset_bottom = 116.0
+theme_override_colors/font_color = Color(1, 0.870588, 0.72549, 1)
+text = "Restart Level
+"
+
+[node name="BackToMenu" type="Button" parent="PauseMenu"]
+layout_mode = 0
+offset_left = 155.5
+offset_top = 125.0
+offset_right = 264.5
+offset_bottom = 156.0
+theme_override_colors/font_color = Color(1, 0.870588, 0.72549, 1)
+text = "Exit To Menu"
+
+[node name="QuitGame" type="Button" parent="PauseMenu"]
+layout_mode = 0
+offset_left = 155.5
+offset_top = 165.0
+offset_right = 264.5
+offset_bottom = 196.0
+theme_override_colors/font_color = Color(1, 0.870588, 0.72549, 1)
+text = "Quit Game
+"

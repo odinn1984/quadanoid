@@ -1,0 +1,8 @@
+[gd_scene load_steps=2 format=3 uid="uid://cmi6cnycxjxil"]
+
+[ext_resource type="Script" path="res://scripts/BrickMatrix.cs" id="1_n6rk3"]
+
+[node name="BrickMatrix" type="Control"]
+layout_mode = 3
+anchors_preset = 0
+script = ExtResource("1_n6rk3")

@@ -1,0 +1,140 @@
+[gd_scene load_steps=17 format=3 uid="uid://dv06nexrlhxay"]
+
+[ext_resource type="Script" path="res://scene_items/scripts/BrickController.cs" id="1_bqqu2"]
+[ext_resource type="Texture2D" uid="uid://dg40mq2gjxmvj" path="res://scene_items/sprites/brick.png" id="2_qu6ns"]
+[ext_resource type="Texture2D" uid="uid://c6tqa526mpw0e" path="res://player/sprites/ball.png" id="3_32tiy"]
+
+[sub_resource type="Gradient" id="Gradient_xlqcw"]
+interpolation_mode = 2
+offsets = PackedFloat32Array(0, 0.218487, 0.428571, 0.680672, 1)
+colors = PackedColorArray(0.996078, 0.384314, 0.266667, 1, 1, 0.870588, 0.72549, 1, 0.996078, 0.384314, 0.266667, 1, 0.988235, 0.160784, 0.278431, 1, 1, 0.870588, 0.72549, 1)
+
+[sub_resource type="GradientTexture1D" id="GradientTexture1D_mxvgr"]
+gradient = SubResource("Gradient_xlqcw")
+
+[sub_resource type="Curve" id="Curve_vd02r"]
+_data = [Vector2(0, 0), 0.0, 0.0, 0, 0, Vector2(0.526022, 1), 0.0, 0.0, 0, 0, Vector2(1, 0), 0.0, 0.0, 0, 0]
+point_count = 3
+
+[sub_resource type="CurveTexture" id="CurveTexture_bk01m"]
+curve = SubResource("Curve_vd02r")
+
+[sub_resource type="ParticleProcessMaterial" id="ParticleProcessMaterial_wyi3r"]
+emission_shape = 3
+emission_box_extents = Vector3(55, 22, 1)
+particle_flag_disable_z = true
+spread = 180.0
+gravity = Vector3(0, 0, 0)
+initial_velocity_min = 5.0
+initial_velocity_max = 20.0
+orbit_velocity_min = 0.0
+orbit_velocity_max = 0.0
+scale_min = 0.1
+scale_max = 0.3
+scale_curve = SubResource("CurveTexture_bk01m")
+color_ramp = SubResource("GradientTexture1D_mxvgr")
+turbulence_noise_strength = 5.0
+turbulence_noise_scale = 10.0
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_pqc2l"]
+size = Vector2(84, 33)
+
+[sub_resource type="CapsuleShape2D" id="CapsuleShape2D_vp83m"]
+radius = 7.5
+height = 33.5
+
+[sub_resource type="CapsuleShape2D" id="CapsuleShape2D_ntr3c"]
+radius = 7.5
+height = 33.5
+
+[sub_resource type="Curve" id="Curve_dwh1v"]
+min_value = -360.0
+max_value = 360.0
+_data = [Vector2(0, 360), 0.0, 0.0, 0, 0, Vector2(1, -360), 0.0, 0.0, 0, 0]
+point_count = 2
+
+[sub_resource type="CurveTexture" id="CurveTexture_db4bf"]
+curve = SubResource("Curve_dwh1v")
+
+[sub_resource type="Curve" id="Curve_y1ivp"]
+_data = [Vector2(0.228625, 1), 0.0, 0.0, 0, 0, Vector2(0.998141, 0), 0.0, 0.0, 0, 0]
+point_count = 2
+
+[sub_resource type="CurveTexture" id="CurveTexture_gssox"]
+curve = SubResource("Curve_y1ivp")
+
+[sub_resource type="ParticleProcessMaterial" id="ParticleProcessMaterial_fi87h"]
+emission_shape = 1
+emission_sphere_radius = 1.0
+particle_flag_disable_z = true
+spread = 180.0
+gravity = Vector3(0, 0, 0)
+initial_velocity_min = 25.0
+initial_velocity_max = 100.0
+angular_velocity_min = -720.0
+angular_velocity_max = 720.0
+orbit_velocity_min = -1.0
+orbit_velocity_max = 1.0
+angle_min = -5.0
+angle_max = 5.0
+angle_curve = SubResource("CurveTexture_db4bf")
+scale_min = 0.1
+scale_max = 0.3
+scale_curve = SubResource("CurveTexture_gssox")
+color_ramp = SubResource("GradientTexture1D_mxvgr")
+hue_variation_min = 0.01
+hue_variation_max = 0.05
+turbulence_noise_strength = 10.0
+turbulence_noise_scale = 1.0
+turbulence_noise_speed_random = 2.61
+turbulence_influence_max = 0.34
+turbulence_initial_displacement_min = -54.9
+turbulence_initial_displacement_max = 39.2
+
+[node name="Brick" type="StaticBody2D" node_paths=PackedStringArray("_sprite") groups=["Bricks"]]
+scale = Vector2(0.8, 0.8)
+collision_layer = 8
+collision_mask = 10
+script = ExtResource("1_bqqu2")
+_sprite = NodePath("BrickSprite")
+
+[node name="Impact" type="GPUParticles2D" parent="."]
+position = Vector2(48, 18)
+scale = Vector2(1, 1)
+emitting = false
+amount = 150
+process_material = SubResource("ParticleProcessMaterial_wyi3r")
+texture = ExtResource("3_32tiy")
+one_shot = true
+explosiveness = 1.0
+fixed_fps = 60
+
+[node name="BrickSprite" type="Sprite2D" parent="."]
+texture = ExtResource("2_qu6ns")
+centered = false
+
+[node name="BrickCollision" type="CollisionShape2D" parent="."]
+position = Vector2(47.875, 15.75)
+shape = SubResource("RectangleShape2D_pqc2l")
+debug_color = Color(0, 0.635294, 0.419608, 0.419608)
+
+[node name="LeftBrickCollision" type="CollisionShape2D" parent="."]
+position = Vector2(7.5, 15.75)
+shape = SubResource("CapsuleShape2D_vp83m")
+debug_color = Color(0.356863, 0.615686, 0.176471, 0.419608)
+
+[node name="RightBrickCollision" type="CollisionShape2D" parent="."]
+position = Vector2(88.5, 15.75)
+shape = SubResource("CapsuleShape2D_ntr3c")
+debug_color = Color(0.356863, 0.615686, 0.176471, 0.419608)
+
+[node name="Explosion" type="GPUParticles2D" parent="."]
+position = Vector2(46, 16)
+emitting = false
+amount = 150
+process_material = SubResource("ParticleProcessMaterial_fi87h")
+texture = ExtResource("3_32tiy")
+lifetime = 1.5
+one_shot = true
+explosiveness = 1.0
+fixed_fps = 60
