@@ -1,4 +1,5 @@
 using System;
+using System.Diagnostics;
 using Godot;
 using System.Linq;
 using System.Threading.Tasks;
@@ -22,6 +23,7 @@ public partial class GameMode : Node2D
   public const string RespawnEffectTimerPath = "Timers/RespawnEffectTimer";
   public const string TransitionEffectTimerPath = "Timers/TransitionEffectTimer";
   public const string EffectAnimationPlayerPath = "Camera2D/EffectLayer/EffectsAnimation";
+  public const string RespawnTimerPath = "Timers/RespawnTimer";
 
   public const string SaveFilePath = "user://save.data";
 
@@ -43,6 +45,8 @@ public partial class GameMode : Node2D
   private bool _gamePaused = false;
   private bool _ballShot = false;
   private bool _restartingScene = false;
+  private bool _transitionMainMenu = false;
+  private bool _respawning = false;
   private uint _score = 0;
   private uint _highScore = 0;
   private uint _livesRemaining;
@@ -65,6 +69,7 @@ public partial class GameMode : Node2D
   private ColorRect _menuEffect;
   private ColorRect _respawnEffect;
   private Timer _respawnEffectTimer;
+  private Timer _respawnTimer;
   private Timer _transitionEffectTimer;
   private AnimationPlayer _effectAnimationPlayer;
   private CharacterBody2D _ball;
@@ -89,6 +94,7 @@ public partial class GameMode : Node2D
     _menuEffect = LoadNode<ColorRect>(MenuEffectPath);
     _respawnEffect= LoadNode<ColorRect>(RespawnEffectPath);
     _respawnEffectTimer = LoadNode<Timer>(RespawnEffectTimerPath);
+    _respawnTimer = LoadNode<Timer>(RespawnTimerPath);
     _transitionEffectTimer = LoadNode<Timer>(TransitionEffectTimerPath);
     _effectAnimationPlayer = LoadNode<AnimationPlayer>(EffectAnimationPlayerPath);
 
@@ -100,6 +106,7 @@ public partial class GameMode : Node2D
     _mainMenuLevel.Pressed += OnMainMenuPressed;
     _quitGameLevel.Pressed += OnQuitGamePressed;
     _respawnEffectTimer.Timeout += OnRespawnEffectTimeOut;
+    _respawnTimer.Timeout += OnRespawnTimeout;
     _transitionEffectTimer.Timeout += OnTransitionEffectTimeOut;
 
     InitializePaddles();
@@ -148,6 +155,13 @@ public partial class GameMode : Node2D
 
   private void OnMainMenuPressed()
   {
+    _transitionEffectTimer.Start();
+    _effectAnimationPlayer.Play("Transition");
+
+    _transitionMainMenu = true;
+    _restartingScene = false;
+    _pauseMenu.Visible = false;
+
     SaveHighScore();
   }
 
@@ -160,20 +174,32 @@ public partial class GameMode : Node2D
   private void OnRespawnEffectTimeOut()
   {
     _respawnEffect.Visible = false;
+  }
+
+  private void OnRespawnTimeout()
+  {
+    _respawning = false;
     SetMovementState(false, true);
   }
 
-  private void OnTransitionEffectTimeOut()
+  async private void OnTransitionEffectTimeOut()
   {
     if (_restartingScene)
     {
       GetTree().ChangeSceneToFile(GetTree().CurrentScene.SceneFilePath);
+    }
+    else if (_transitionMainMenu)
+    {
+      PackedScene next = ResourceLoader.Load<PackedScene>("res://levels/main_menu.tscn");
+      await Task.Delay(TimeSpan.FromMilliseconds(1000));
+      GetTree().ChangeSceneToPacked(next);
     }
     else
     {
       _menuEffect.Visible = false;
       _respawnEffect.Visible = true;
       _respawnEffectTimer.Start();
+      _respawnTimer.Start();
     }
   }
 
@@ -185,7 +211,7 @@ public partial class GameMode : Node2D
     _highScoreLabel.Text = $"HIGH SCORE {_highScore}";
     _levelLabel.Text = $"LVL {_currentLevel} (+{MathF.Round((_currentSpeed - 1.0f) * 100.0f)}%)";
 
-    if (Input.IsActionJustPressed("Shoot") && _livesRemaining > 0 && BrickCount > 0 && !_gamePaused)
+    if (Input.IsActionJustPressed("Shoot") && _livesRemaining > 0 && BrickCount > 0 && !_gamePaused && !_respawning)
     {
       _ballShot = true;
       SetMovementState(true, true);
@@ -232,6 +258,8 @@ public partial class GameMode : Node2D
 
   public void Respawn(bool outOfBounds = true)
   {
+    _respawning = true;
+
     if (outOfBounds)
     {
       DecreaseScore();
@@ -241,6 +269,7 @@ public partial class GameMode : Node2D
       {
         _respawnEffect.Visible = true;
         _respawnEffectTimer.Start();
+        _respawnTimer.Start();
       }
     }
 
@@ -257,7 +286,6 @@ public partial class GameMode : Node2D
     }
 
     _ballShot = false;
-
     SetMovementState(false, false);
   }
 

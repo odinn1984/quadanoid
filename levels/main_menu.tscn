@@ -1,0 +1,152 @@
+[gd_scene load_steps=12 format=3 uid="uid://csnj8ksfghuyd"]
+
+[ext_resource type="Script" path="res://scripts/MainMenu.cs" id="1_1pfq7"]
+[ext_resource type="Texture2D" uid="uid://138mo4w14d8m" path="res://assets/Quadanoid Start Screen.png" id="1_qflbb"]
+[ext_resource type="Shader" path="res://shaders/transition.gdshader" id="3_2oppq"]
+[ext_resource type="Shader" path="res://shaders/blur.gdshader" id="3_clr42"]
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_q0dbs"]
+shader = ExtResource("3_clr42")
+shader_parameter/amount = 1.5
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_8d57m"]
+shader = ExtResource("3_2oppq")
+shader_parameter/num_lines = 5.0
+shader_parameter/y_threshold = 0.0
+shader_parameter/line_color_a = Color(1, 0.870588, 0.72549, 1)
+shader_parameter/line_color_b = Color(0.988235, 0.160784, 0.278431, 1)
+
+[sub_resource type="Environment" id="Environment_pjloj"]
+background_mode = 3
+background_color = Color(0.0431373, 0.0431373, 0.0431373, 1)
+glow_enabled = true
+glow_bloom = 0.08
+glow_blend_mode = 0
+adjustment_enabled = true
+adjustment_brightness = 0.9
+adjustment_contrast = 1.1
+adjustment_saturation = 1.5
+
+[sub_resource type="Animation" id="Animation_hj1uj"]
+resource_name = "Transition"
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("EffectsLayer/Transition:material:shader_parameter/y_threshold")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0, 1),
+"transitions": PackedFloat32Array(1, 1),
+"update": 0,
+"values": [0.0, 1.0]
+}
+
+[sub_resource type="Animation" id="Animation_oven6"]
+length = 0.001
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("EffectsLayer/Transition:material:shader_parameter/y_threshold")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 0,
+"values": [0.0]
+}
+
+[sub_resource type="Animation" id="Animation_wyo0r"]
+resource_name = "ReverseTransition"
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("EffectsLayer/Transition:material:shader_parameter/y_threshold")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0, 1),
+"transitions": PackedFloat32Array(1, 1),
+"update": 0,
+"values": [1.0, 0.0]
+}
+
+[sub_resource type="AnimationLibrary" id="AnimationLibrary_hba2b"]
+_data = {
+"RESET": SubResource("Animation_oven6"),
+"ReverseTransition": SubResource("Animation_wyo0r"),
+"Transition": SubResource("Animation_hj1uj")
+}
+
+[node name="MainMenu" type="Node2D"]
+script = ExtResource("1_1pfq7")
+
+[node name="EffectsLayer" type="CanvasLayer" parent="."]
+layer = 0
+
+[node name="BlurEffect" type="ColorRect" parent="EffectsLayer"]
+visible = false
+material = SubResource("ShaderMaterial_q0dbs")
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+
+[node name="Transition" type="ColorRect" parent="EffectsLayer"]
+material = SubResource("ShaderMaterial_8d57m")
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Control" type="Control" parent="."]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="TextureRect" type="TextureRect" parent="Control"]
+layout_mode = 0
+offset_right = 720.0
+offset_bottom = 800.0
+texture = ExtResource("1_qflbb")
+
+[node name="StartGame" type="Button" parent="Control"]
+layout_mode = 0
+offset_left = 224.0
+offset_top = 568.0
+offset_right = 544.0
+offset_bottom = 640.0
+theme_override_colors/font_color = Color(1, 0.870588, 0.72549, 1)
+theme_override_font_sizes/font_size = 40
+text = "Start
+"
+
+[node name="QuitGame" type="Button" parent="Control"]
+layout_mode = 0
+offset_left = 224.0
+offset_top = 656.0
+offset_right = 544.0
+offset_bottom = 728.0
+theme_override_colors/font_color = Color(1, 0.870588, 0.72549, 1)
+theme_override_font_sizes/font_size = 40
+text = "Quit"
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="."]
+environment = SubResource("Environment_pjloj")
+
+[node name="TransitionEffectTimer" type="Timer" parent="."]
+wait_time = 1.1
+one_shot = true
+
+[node name="EffectsAnimation" type="AnimationPlayer" parent="."]
+libraries = {
+"": SubResource("AnimationLibrary_hba2b")
+}
