@@ -32,7 +32,7 @@ resource_name = "Transition"
 tracks/0/type = "value"
 tracks/0/imported = false
 tracks/0/enabled = true
-tracks/0/path = NodePath("EffectsLayer/Transition:material:shader_parameter/y_threshold")
+tracks/0/path = NodePath("Camera2D/EffectsLayer/Transition:material:shader_parameter/y_threshold")
 tracks/0/interp = 1
 tracks/0/loop_wrap = true
 tracks/0/keys = {
@@ -47,7 +47,7 @@ length = 0.001
 tracks/0/type = "value"
 tracks/0/imported = false
 tracks/0/enabled = true
-tracks/0/path = NodePath("EffectsLayer/Transition:material:shader_parameter/y_threshold")
+tracks/0/path = NodePath("Camera2D/EffectsLayer/Transition:material:shader_parameter/y_threshold")
 tracks/0/interp = 1
 tracks/0/loop_wrap = true
 tracks/0/keys = {
@@ -62,7 +62,7 @@ resource_name = "ReverseTransition"
 tracks/0/type = "value"
 tracks/0/imported = false
 tracks/0/enabled = true
-tracks/0/path = NodePath("EffectsLayer/Transition:material:shader_parameter/y_threshold")
+tracks/0/path = NodePath("Camera2D/EffectsLayer/Transition:material:shader_parameter/y_threshold")
 tracks/0/interp = 1
 tracks/0/loop_wrap = true
 tracks/0/keys = {
@@ -82,10 +82,16 @@ _data = {
 [node name="MainMenu" type="Node2D"]
 script = ExtResource("1_1pfq7")
 
-[node name="EffectsLayer" type="CanvasLayer" parent="."]
-layer = 0
+[node name="Sun" type="DirectionalLight2D" parent="."]
+color = Color(1, 0.870588, 0.72549, 1)
+blend_mode = 2
 
-[node name="BlurEffect" type="ColorRect" parent="EffectsLayer"]
+[node name="Camera2D" type="Camera2D" parent="."]
+anchor_mode = 0
+
+[node name="EffectsLayer" type="CanvasLayer" parent="Camera2D"]
+
+[node name="BlurEffect" type="ColorRect" parent="Camera2D/EffectsLayer"]
 visible = false
 material = SubResource("ShaderMaterial_q0dbs")
 anchors_preset = 15
@@ -96,7 +102,7 @@ grow_vertical = 2
 size_flags_horizontal = 3
 size_flags_vertical = 3
 
-[node name="Transition" type="ColorRect" parent="EffectsLayer"]
+[node name="Transition" type="ColorRect" parent="Camera2D/EffectsLayer"]
 material = SubResource("ShaderMaterial_8d57m")
 anchors_preset = 15
 anchor_right = 1.0
@@ -104,22 +110,14 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 
-[node name="Control" type="Control" parent="."]
-layout_mode = 3
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-grow_horizontal = 2
-grow_vertical = 2
-
-[node name="TextureRect" type="TextureRect" parent="Control"]
-layout_mode = 0
+[node name="TextureRect" type="TextureRect" parent="."]
 offset_right = 720.0
 offset_bottom = 800.0
 texture = ExtResource("1_qflbb")
 
-[node name="StartGame" type="Button" parent="Control"]
-layout_mode = 0
+[node name="UILayer" type="CanvasLayer" parent="."]
+
+[node name="StartGame" type="Button" parent="UILayer"]
 offset_left = 224.0
 offset_top = 568.0
 offset_right = 544.0
@@ -129,8 +127,7 @@ theme_override_font_sizes/font_size = 40
 text = "Start
 "
 
-[node name="QuitGame" type="Button" parent="Control"]
-layout_mode = 0
+[node name="QuitGame" type="Button" parent="UILayer"]
 offset_left = 224.0
 offset_top = 656.0
 offset_right = 544.0

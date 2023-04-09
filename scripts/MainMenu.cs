@@ -6,9 +6,9 @@ public partial class MainMenu : Node2D
 {
   public const string TransitionEffectTimerPath = "TransitionEffectTimer";
   public const string EffectAnimationPlayerPath = "EffectsAnimation";
-  public const string StartLevelButtonPath = "Control/StartGame";
-  public const string QuitGameButtonPath = "Control/QuitGame";
-  public const string BlurEffectPath = "EffectsLayer/BlurEffect";
+  public const string StartLevelButtonPath = "UILayer/StartGame";
+  public const string QuitGameButtonPath = "UILayer/QuitGame";
+  public const string BlurEffectPath = "Camera2D/EffectsLayer/BlurEffect";
 
   private bool _transitioning = false;
 
@@ -33,6 +33,8 @@ public partial class MainMenu : Node2D
     _transitionEffectTimer.Start();
     _effectAnimationPlayer.Play("ReverseTransition");
     _blurEffect.Visible = true;
+    _startLevel.Visible = false;
+    _quitGame.Visible = false;
   }
 
   private T LoadNode<T>(string path) where T : GodotObject
@@ -49,6 +51,8 @@ public partial class MainMenu : Node2D
 
   private void OnStartLevelPressed()
   {
+    _startLevel.Visible = false;
+    _quitGame.Visible = false;
     _transitioning = true;
     _transitionEffectTimer.Start();
     _effectAnimationPlayer.Play("Transition");
@@ -71,6 +75,8 @@ public partial class MainMenu : Node2D
     else
     {
       _blurEffect.Visible = false;
+      _startLevel.Visible = true;
+      _quitGame.Visible = true;
     }
   }
 
