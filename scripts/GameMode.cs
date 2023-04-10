@@ -31,7 +31,7 @@ public partial class GameMode : Node2D
   private float _speedIncreaseOnClearPercent = 0.1f;
 
   [Export(PropertyHint.Range, "1,100,1")]
-  private uint _maxLives = 10;
+  private uint _maxLives = 1;
 
   [Export(PropertyHint.Range, "1,50,1")]
   private uint _scoreOnBrickBreak = 25;
@@ -259,6 +259,9 @@ public partial class GameMode : Node2D
   public void Respawn(bool outOfBounds = true)
   {
     _respawning = true;
+    _ballShot = false;
+    
+    SetMovementState(false, false);
 
     if (outOfBounds)
     {
@@ -284,9 +287,6 @@ public partial class GameMode : Node2D
     {
       paddle.Call("Respawn");
     }
-
-    _ballShot = false;
-    SetMovementState(false, false);
   }
 
   public void RemoveBrick()
@@ -361,10 +361,12 @@ public partial class GameMode : Node2D
   private void SetMovementState(bool ball, bool paddles)
   {
     _ball.Set("CanMove", ball);
+    _ball.Set("Velocity", Vector2.Zero);
 
     foreach (CharacterBody2D paddle in _paddles)
     {
       paddle.Set("CanMove", paddles);
+      paddle.Set("Velocity", Vector2.Zero);
     }
   }
 
@@ -408,6 +410,6 @@ public partial class GameMode : Node2D
       _menuEffect.Visible = !_menuEffect.Visible;
       _gamePaused = _pauseMenu.Visible;
 
-    SetMovementState(!_gamePaused && _ballShot, !_gamePaused);
+    SetMovementState(!_gamePaused && _ballShot && _livesRemaining > 0, !_gamePaused && _livesRemaining > 0);
   }
 }

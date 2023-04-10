@@ -66,6 +66,12 @@ public partial class PaddleController : CharacterBody2D
     float moveRightStrength = Input.GetActionStrength("MoveRight") - Input.GetActionStrength("MoveLeft");
     float moveUpStrength = Input.GetActionStrength("MoveUp") - Input.GetActionStrength("MoveDown");
 
+    if (!CanMove)
+    {
+      moveRightStrength = 0.0f;
+      moveUpStrength = 0.0f;
+    }
+
     _moveDirection = new Vector2(
       MathF.Sign(moveRightStrength),
       MathF.Sign(moveUpStrength)
@@ -92,11 +98,6 @@ public partial class PaddleController : CharacterBody2D
 
   private void HandleMovement()
   {
-    if (!CanMove)
-    {
-      return;
-    }
-
     if (_moveDirection.IsZeroApprox())
     {
       Velocity = SlowDown();
@@ -147,7 +148,7 @@ public partial class PaddleController : CharacterBody2D
   {
     Position = _spawnPosition;
     Velocity = Vector2.Zero;
-    CanMove = true;
+    CanMove = false;
   }
 
   public Vector2 GetBounceDirectionForCollision(KinematicCollision2D collision, Vector2 originalDirection)
