@@ -7,6 +7,7 @@ public partial class BallController : CharacterBody2D
   public const string BallTriggerAreaName = "BallTriggerArea";
   public const string PaddleTriggerAreaName = "PaddleTriggerArea";
   public const string TrailName = "Trail";
+  public const string AudioStreamsPath = "AudioStreams";
 
   [ExportGroup("Ball Controller Settings")]
   [Export(PropertyHint.ColorNoAlpha)]
@@ -22,6 +23,7 @@ public partial class BallController : CharacterBody2D
   private bool CanMove { get; set; }
 
   private uint _trailLength = 100;
+  private uint _nextAudioStream = 0;
   private float _currentSpeed;
 
   private CharacterBody2D _followPaddle = null;
@@ -31,6 +33,8 @@ public partial class BallController : CharacterBody2D
 
   private Sprite2D _sprite;
   private Line2D _trail;
+  private Control _audioStreams;
+  private Godot.Collections.Array<Node> _audioStreamsPlayer;
 
   public override void _Ready()
   {
@@ -69,6 +73,8 @@ public partial class BallController : CharacterBody2D
     }
 
     _trail = LoadNode<Line2D>(TrailName);
+    _audioStreams = LoadNode<Control>(AudioStreamsPath);
+    _audioStreamsPlayer = _audioStreams.GetChildren();
   }
 
   private T LoadNode<T>(string path) where T : GodotObject
@@ -91,16 +97,41 @@ public partial class BallController : CharacterBody2D
   {
     if (body.IsInGroup("Bricks"))
     {
+      Random random = new Random();
+      AudioStreamPlayer2D stream = GetNextAudioStream();
+
+      stream.PitchScale = Math.Clamp(random.NextSingle(), 0.75f, 1.25f);
+      stream.Play();
       body.Call("Hit");
     }
   }
 
   public void OnPaddleEntered(Node2D body)
   {
-    if (body.IsInGroup("Paddles") && !CanMove)
+    if (body.IsInGroup("Paddles"))
     {
-      _followPaddle = body as CharacterBody2D;
+      if (CanMove)
+      {
+        Random random = new Random();
+        AudioStreamPlayer2D stream = GetNextAudioStream();
+
+        stream.PitchScale = Math.Clamp(random.NextSingle(), 0.5f, 0.55f);
+        stream.Play();
+      }
+      else
+      {
+        _followPaddle = body as CharacterBody2D;
+      }
     }
+  }
+
+  private AudioStreamPlayer2D GetNextAudioStream()
+  {
+    uint currentStream = _nextAudioStream;
+
+    _nextAudioStream = (_nextAudioStream + 1) % (uint)_audioStreamsPlayer.Count;
+
+    return _audioStreamsPlayer[(int)currentStream] as AudioStreamPlayer2D;
   }
 
   public void OnPaddleExited(Node2D body)

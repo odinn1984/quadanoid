@@ -24,6 +24,8 @@ public partial class GameMode : Node2D
   public const string TransitionEffectTimerPath = "Timers/TransitionEffectTimer";
   public const string EffectAnimationPlayerPath = "Camera2D/EffectLayer/EffectsAnimation";
   public const string RespawnTimerPath = "Timers/RespawnTimer";
+  public const string RespawnSFXPath = "RespawnSFX";
+  public const string MusicPath = "BGMusic";
 
   public const string SaveFilePath = "user://save.data";
 
@@ -31,7 +33,7 @@ public partial class GameMode : Node2D
   private float _speedIncreaseOnClearPercent = 0.1f;
 
   [Export(PropertyHint.Range, "1,100,1")]
-  private uint _maxLives = 1;
+  private uint _maxLives = 10;
 
   [Export(PropertyHint.Range, "1,50,1")]
   private uint _scoreOnBrickBreak = 25;
@@ -46,7 +48,7 @@ public partial class GameMode : Node2D
   private bool _ballShot = false;
   private bool _restartingScene = false;
   private bool _transitionMainMenu = false;
-  private bool _respawning = false;
+  private bool _respawning = true;
   private uint _score = 0;
   private uint _highScore = 0;
   private uint _livesRemaining;
@@ -74,6 +76,8 @@ public partial class GameMode : Node2D
   private AnimationPlayer _effectAnimationPlayer;
   private CharacterBody2D _ball;
   private CharacterBody2D[] _paddles = {};
+  private AudioStreamPlayer2D _respawnSFX;
+  private AudioStreamPlayer2D _music;
 
   public override void _Ready()
   {
@@ -97,6 +101,8 @@ public partial class GameMode : Node2D
     _respawnTimer = LoadNode<Timer>(RespawnTimerPath);
     _transitionEffectTimer = LoadNode<Timer>(TransitionEffectTimerPath);
     _effectAnimationPlayer = LoadNode<AnimationPlayer>(EffectAnimationPlayerPath);
+    _respawnSFX = LoadNode<AudioStreamPlayer2D>(RespawnSFXPath);
+    _music = LoadNode<AudioStreamPlayer2D>(MusicPath);
 
     _effectAnimationPlayer.Play("ReverseTransition");
     _transitionEffectTimer.Start();
@@ -147,6 +153,7 @@ public partial class GameMode : Node2D
   {
     SaveHighScore();
 
+    _music.Stop();
     _transitionEffectTimer.Start();
     _effectAnimationPlayer.Play("Transition");
     _restartingScene = true;
@@ -155,6 +162,7 @@ public partial class GameMode : Node2D
 
   private void OnMainMenuPressed()
   {
+    _music.Stop();
     _transitionEffectTimer.Start();
     _effectAnimationPlayer.Play("Transition");
 
@@ -167,6 +175,7 @@ public partial class GameMode : Node2D
 
   private void OnQuitGamePressed()
   {
+    _music.Stop();
     SaveHighScore();
     GetTree().Quit();
   }
@@ -174,6 +183,7 @@ public partial class GameMode : Node2D
   private void OnRespawnEffectTimeOut()
   {
     _respawnEffect.Visible = false;
+    _respawnTimer.Start();
   }
 
   private void OnRespawnTimeout()
@@ -186,18 +196,24 @@ public partial class GameMode : Node2D
   {
     if (_restartingScene)
     {
+      _music.Stop();
       GetTree().ChangeSceneToFile(GetTree().CurrentScene.SceneFilePath);
     }
     else if (_transitionMainMenu)
     {
       PackedScene next = ResourceLoader.Load<PackedScene>("res://levels/main_menu.tscn");
+
+      _music.Stop();
+
       await Task.Delay(TimeSpan.FromMilliseconds(1000));
+
       GetTree().ChangeSceneToPacked(next);
     }
     else
     {
       _menuEffect.Visible = false;
       _respawnEffect.Visible = true;
+      _respawnSFX.Play();
       _respawnEffectTimer.Start();
       _respawnTimer.Start();
     }
@@ -270,6 +286,8 @@ public partial class GameMode : Node2D
 
       if (_livesRemaining > 0)
       {
+        _respawnSFX.Play();
+
         _respawnEffect.Visible = true;
         _respawnEffectTimer.Start();
         _respawnTimer.Start();
@@ -404,11 +422,12 @@ public partial class GameMode : Node2D
 
   private void ShowPauseMenu(string title = "MENU")
   {
-    _pauseMenuLabel.Text = title.ToUpper();
+    _music.PitchScale = _pauseMenu.Visible ? 1.0f : 0.5f;
 
-      _pauseMenu.Visible = !_pauseMenu.Visible;
-      _menuEffect.Visible = !_menuEffect.Visible;
-      _gamePaused = _pauseMenu.Visible;
+    _pauseMenuLabel.Text = title.ToUpper();
+    _pauseMenu.Visible = !_pauseMenu.Visible;
+    _menuEffect.Visible = !_menuEffect.Visible;
+    _gamePaused = _pauseMenu.Visible;
 
     SetMovementState(!_gamePaused && _ballShot && _livesRemaining > 0, !_gamePaused && _livesRemaining > 0);
   }

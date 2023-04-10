@@ -1,12 +1,14 @@
-[gd_scene load_steps=25 format=3 uid="uid://cvt6ygctmahbu"]
+[gd_scene load_steps=27 format=3 uid="uid://cvt6ygctmahbu"]
 
 [ext_resource type="Script" path="res://scripts/GameMode.cs" id="1_ggg8o"]
 [ext_resource type="Shader" path="res://shaders/blur.gdshader" id="2_ogey8"]
-[ext_resource type="PackedScene" uid="uid://c3v8bkjjugc30" path="res://player/ball.tscn" id="2_om5qa"]
+[ext_resource type="PackedScene" uid="uid://nu6l38w2puuh" path="res://player/ball.tscn" id="2_om5qa"]
 [ext_resource type="Shader" path="res://shaders/glitch.gdshader" id="3_an3g4"]
 [ext_resource type="PackedScene" uid="uid://d3c0nfo7h0hqq" path="res://player/paddle.tscn" id="3_d8fa2"]
 [ext_resource type="Shader" path="res://shaders/transition.gdshader" id="4_j3xgx"]
 [ext_resource type="PackedScene" uid="uid://cmi6cnycxjxil" path="res://levels/brick_matrix.tscn" id="4_tf0sx"]
+[ext_resource type="AudioStream" uid="uid://ddq1owvhimyed" path="res://assets/music/ES_Last Cassette - William Claeson.wav" id="8_llldd"]
+[ext_resource type="AudioStream" uid="uid://c4w7ninrmxksc" path="res://assets/sfx/respawn.wav" id="9_t2yqw"]
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_crlrp"]
 shader = ExtResource("2_ogey8")
@@ -26,21 +28,6 @@ shader_parameter/num_lines = 5.0
 shader_parameter/y_threshold = 0.0
 shader_parameter/line_color_a = Color(1, 0.870588, 0.72549, 1)
 shader_parameter/line_color_b = Color(0.988235, 0.160784, 0.278431, 1)
-
-[sub_resource type="Animation" id="Animation_07ec1"]
-resource_name = "Transition"
-tracks/0/type = "value"
-tracks/0/imported = false
-tracks/0/enabled = true
-tracks/0/path = NodePath("Transition:material:shader_parameter/y_threshold")
-tracks/0/interp = 1
-tracks/0/loop_wrap = true
-tracks/0/keys = {
-"times": PackedFloat32Array(0, 1),
-"transitions": PackedFloat32Array(1, 1),
-"update": 0,
-"values": [0.0, 1.0]
-}
 
 [sub_resource type="Animation" id="Animation_5od4m"]
 length = 0.001
@@ -70,6 +57,21 @@ tracks/0/keys = {
 "transitions": PackedFloat32Array(1, 1),
 "update": 0,
 "values": [1.0, 0.0]
+}
+
+[sub_resource type="Animation" id="Animation_07ec1"]
+resource_name = "Transition"
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("Transition:material:shader_parameter/y_threshold")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0, 1),
+"transitions": PackedFloat32Array(1, 1),
+"update": 0,
+"values": [0.0, 1.0]
 }
 
 [sub_resource type="AnimationLibrary" id="AnimationLibrary_k6q2j"]
@@ -174,6 +176,7 @@ grow_horizontal = 2
 grow_vertical = 2
 
 [node name="EffectsAnimation" type="AnimationPlayer" parent="Camera2D/EffectLayer"]
+reset_on_save = false
 libraries = {
 "": SubResource("AnimationLibrary_k6q2j")
 }
@@ -450,3 +453,14 @@ one_shot = true
 [node name="RespawnTimer" type="Timer" parent="Timers"]
 wait_time = 0.5
 one_shot = true
+
+[node name="BGMusic" type="AudioStreamPlayer2D" parent="."]
+stream = ExtResource("8_llldd")
+autoplay = true
+bus = &"Music"
+
+[node name="RespawnSFX" type="AudioStreamPlayer2D" parent="."]
+stream = ExtResource("9_t2yqw")
+volume_db = -10.0
+pitch_scale = 0.75
+bus = &"SFX"
